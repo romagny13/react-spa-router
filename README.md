@@ -27,6 +27,7 @@ import { Router } from 'react-spa-router';
 
 Router config | Description
 -------- |  --------
+routes | routes array
 mode | <strong>hash</strong> (by default) and <strong>history</strong> (html5 history).
 scroll | handle navigation to fragment (true by default)
 
