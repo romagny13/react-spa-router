@@ -1,0 +1,9 @@
+require("./activatorSpec");
+require("./guardSpec");
+require("./routerSpec");
+require("./routeConfigSpec");
+require("./routeResolverSpec");
+require("./hashSpec");
+require("./html5Spec");
+require("./utilSpec");
+require("./linkSpec");

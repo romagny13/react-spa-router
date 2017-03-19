@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <link rel="stylesheet" href="fxsmall.css" />
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to {  opacity: 1;  }
+        }
+        
+        @keyframes fadeOut {
+            from {  opacity: 1; }
+            to {  opacity: 0; }
+        }
+        
+        .fadeIn {
+            animation: 1s linear 0s fadeIn forwards;
+        }
+        
+        .fadeOut {
+            animation: 1s linear 0s fadeOut forwards;
+        }
+        
+        .active {
+            color: orange;
+        }
+        
+        .active>a {
+            color: orange;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app"></div>
+    <script src="./dist/build.js"></script>
+</body>
+
+</html>
