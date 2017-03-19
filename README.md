@@ -1,5 +1,7 @@
 # React Spa Router
 
+[![Build Status](https://travis-ci.org/romagny13/react-spa-router.svg?branch=master)](https://travis-ci.org/romagny13/react-spa-router)
+
 Router for React applications:
 - <strong>2 modes</strong> : <strong>html5 history</strong>,<strong>hash</strong>
 - <strong>Page animation/transition with css or js</strong>
@@ -165,13 +167,13 @@ Set exact to false
 <Link to='/customers' activeClassName='active' exact={false}>Customers</Link>
 ```
 
-### pattern
+### Pattern
 Allow to define a regex to check active
 ```js
 <Link to='/posts/10' activeClassName='active' activePattern={/\/posts\/[0-9]+/}>Detail/Link>
 ```
 
-### Wrap link into a other element (tag)
+### Wrap link into an other element (tag)
 
 Example link will be append to a li element. The activeClassName is added to li element.
 ```js
@@ -256,6 +258,8 @@ Example a fadeIn, fadeOut
 ```js
 <RouterView className='fxShuffle' enter='navInPrev' leave='navOutPrev' enterTimeout={500} leaveTimeout={500} simultaneous={true} />
 ```
+
+<img src="http://res.cloudinary.com/romagny13/image/upload/v1485903103/anim_perzdm.png" />
 
 ### JavaScript animation
 
