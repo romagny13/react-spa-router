@@ -178,7 +178,7 @@ Allow to define a regex to check active
 
 Example link will be append to a li element. The activeClassName is added to li element.
 ```js
- <ul>
+<ul>
     <Link tag='li' to='/' activeClassName='active'>Home</Link>
 </ul>
 ```

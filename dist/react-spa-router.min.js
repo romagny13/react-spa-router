@@ -1,5 +1,5 @@
 /*!
- * React Spa Router v0.0.1
+ * React Spa Router v0.0.2
  * (c) 2017 romagny13
  * Released under the MIT License.
  */
