@@ -43,6 +43,17 @@ canDeactivate | route guards
 redirectTo | redirect to route url
 children | nested routes
 
+Resolved Route
+Route | Description
+-------- |  --------
+url |  full url
+path | path string
+params | params object
+queryString | qurey string
+query |  query object
+fragment | fragment
+matched | matched Route config
+
 <img src="http://res.cloudinary.com/romagny13/image/upload/v1483654173/captureurl_ejcmab.png" />
 
 Example create routes
