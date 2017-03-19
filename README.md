@@ -387,7 +387,8 @@ export class PostList extends React.Component<any, any> {
 ## With Redux
 
 Example:
-=> index.js
+
+index.js
 ```js
 import React from 'react';
 import { render } from 'react-dom';
@@ -406,8 +407,7 @@ render(
 );
 ```
 
-define routes
-=> routes.js
+routes.js
 ```js
 import React from 'react';
 import { viewRender } from 'react-spa-router';
@@ -423,7 +423,7 @@ export const routes = [
 ];
 ```
 
-=> App.js
+App.js
 ```js
 import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
