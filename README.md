@@ -48,7 +48,7 @@ Resolved Route | Description
 url |  full url
 path | path string
 params | params object
-queryString | qurey string
+queryString | query string
 query |  query object
 fragment | fragment
 matched | matched Route config
