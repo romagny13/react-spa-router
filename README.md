@@ -383,3 +383,75 @@ export class PostList extends React.Component<any, any> {
     }
 }
 ```
+
+## With Redux
+
+Example:
+=> index.js
+```js
+import React from 'react';
+import { render } from 'react-dom';
+import { Provider } from 'react-redux';
+import store from './store/store';
+import App from './components/App';
+
+import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
+import './styles/styles.css';
+
+render(
+    <Provider store={store}>
+        <App />
+    </Provider>,
+    document.getElementById('app')
+);
+```
+
+define routes
+=> routes.js
+```js
+import React from 'react';
+import { viewRender } from 'react-spa-router';
+
+import HomePage from './components/home/HomePage';
+import MoviePage from './components/movie/MoviePage';
+import AboutPage from './components/about/AboutPage';
+
+export const routes = [
+    { path:'/', action: () => viewRender(<HomePage />)},
+    { path: '/movie', action: () => viewRender(<MoviePage />) },
+    { path: '/about', action: () => viewRender(<AboutPage />) }
+];
+```
+
+=> App.js
+```js
+import React, { PropTypes } from 'react';
+import { connect } from 'react-redux';
+import { Router, RouterView } from 'react-spa-router';
+import { routes } from '../routes';
+
+import Header from '../components/common/Header';
+
+class App extends React.Component {
+    constructor(props) {
+        super(props);
+        const router = new Router({
+            mode: 'history',
+            routes
+        }).run();
+    }
+    render() {
+        return (
+            <div>
+                <Header />
+                <div className="container">
+                    <RouterView />
+                </div>
+            </div>
+        );
+    }
+}
+export default App;
+```
+etc.
+
