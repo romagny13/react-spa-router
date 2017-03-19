@@ -127,6 +127,14 @@ class App extends React.Component<any, any> {
 }
 ```
 
+## Base Tag
+Usefull to specifiy explicitly the base path of the site.
+
+Example (in the head of the index.html page) 
+```html
+<base href="http://my-site.com/blog">
+```
+
 ## Router Link
 
 ### With path
