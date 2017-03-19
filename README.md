@@ -43,8 +43,7 @@ canDeactivate | route guards
 redirectTo | redirect to route url
 children | nested routes
 
-Resolved Route
-Route | Description
+Resolved Route | Description
 -------- |  --------
 url |  full url
 path | path string
