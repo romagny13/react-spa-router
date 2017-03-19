@@ -3,13 +3,13 @@
 [![Build Status](https://travis-ci.org/romagny13/react-spa-router.svg?branch=master)](https://travis-ci.org/romagny13/react-spa-router)
 
 Router for React applications:
-- <strong>2 modes</strong> : <strong>html5 history</strong>,<strong>hash</strong>
-- <strong>Page animation/transition with css or js</strong>
-- <strong>Active</strong> elements
-- <strong>Route guards</strong>
-- <strong>Child routes</strong>
-- <strong>Named views</strong>
-- <strong>Actions</strong>
+- <strong>2 modes</strong> : <strong>hash</strong> and <strong>history</strong>
+- <strong>page animation/transition with css or js</strong>
+- <strong>activeClassName</strong>
+- <strong>route guards</strong>
+- <strong>children</strong>
+- <strong>named views</strong>
+- <strong>actions</strong>
 
 ## Installation
 
@@ -196,7 +196,7 @@ Is the container for the "router-pages"
  <RouterView name='my-view' />
  ```
 
-### Change component of a view with "viewRender" function
+## Change view component with "viewRender" function
 
 ```js
 viewRender(<Home />)
@@ -254,7 +254,7 @@ Example a fadeIn, fadeOut
 }
 ```
 
-#### simultaneous animation
+### Simultaneous animation
 
 ```js
 <RouterView className='fxShuffle' enter='navInPrev' leave='navOutPrev' enterTimeout={500} leaveTimeout={500} simultaneous={true} />
