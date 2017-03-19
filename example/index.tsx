@@ -99,6 +99,15 @@ export class CustomerDetail extends React.Component<any, any> {
     }
 }
 
+function doSomething() {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            console.log('result 2');
+            resolve('result 2');
+        }, 3000);
+    });
+}
+
 const routes = [
     { path: '/', action: () => viewRender(<Home />) },
     { path: '/posts', action: () => viewRender(<PostList />), canActivate: [MyGuard], canDeactivate: [MyGuard] },
@@ -116,18 +125,52 @@ const routes = [
                 ]
             },
             {
+                path: 'async',
+                actions: [
+                    () => {
+                        // with promise
+                        return new Promise((resolve) => {
+                            setTimeout(() => {
+                                console.log('result 1');
+                                resolve('result 1');
+                            }, 1000);
+                        });
+                    },
+                    async ({ result }) => {
+                        console.log('receive result', result);
+                        // with async await
+                        return await doSomething();
+                    },
+                    ({ result }) => {
+                        console.log('receive result', result);
+                        // simple result
+                        console.log('result 3');
+                        return 'result 3';
+                    },
+                    ({ result }) => {
+                        console.log('receive result', result);
+                        // with promise
+                        return new Promise((resolve) => {
+                            setTimeout(() => {
+                                console.log('result 4');
+                                resolve('result 4');
+                            }, 1000);
+                        });
+                    },
+                    ({ result }) => console.log('Final result', result)
+                ]
+            },
+            {
                 path: ':id',
                 actions: [
                     () => viewRender(<CustomerList />, 'top'),
                     ({ route }) => viewRender(<CustomerDetail id={route.params.id} />, 'bottom'),
-                    () => 'My result',
-                    ({ router, route, result }) => console.log('Activate customer detail', router, route, result)
+                    ({ router, route }) => console.log('Activate customer detail', router, route)
                 ]
             }]
     },
     { path: '**', redirectTo: '/' }
 ];
-
 
 class App extends React.Component<any, any> {
     constructor(props) {
@@ -165,6 +208,7 @@ class App extends React.Component<any, any> {
                         <Link tag='li' to='/posts/10' activeClassName='active'>Detail</Link>
                         <Link tag='li' to={{ path: '/posts/50', query: { q: 'mysearch' }, fragment: '#section1' }} activeClassName='active' activePattern={/\/posts\/[0-9]+/}>Query+fragment and active pattern</Link>
                         <Link tag='li' to='/customers' activeClassName='active' exact={false}>Customers</Link>
+                        <Link tag='li' to='/customers/async' activeClassName='active' exact={false}>Async</Link>
                         {/* named route */}
                         <Link tag='li' to={{ name: 'about' }} activeClassName='active'>About</Link>
                     </ul>

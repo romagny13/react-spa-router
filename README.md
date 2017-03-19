@@ -88,6 +88,49 @@ const routes = [
 ];
 ```
 
+Chaining promises, async/ await, simple returned values ...
+
+```js
+function doSomething() {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve('result 2');
+        }, 3000);
+    });
+}
+
+const routes = [
+    {
+        path: '/', actions: [
+            // with promise
+            () => {
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        resolve('result 1');
+                    }, 1000);
+                });
+            },
+            // with async await
+            async ({ result }) => { // result 1
+                return await doSomething();
+            },
+            // simple result
+            ({ result }) => { // result 2
+                return 'result 3';
+            },
+            ({ result }) => { // result 3
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        resolve('result 4');
+                    }, 1000);
+                });
+            },
+            ({ result }) => console.log('Final result', result) // result 4
+        ]
+    }
+];
+```
+
 Create router (in App component)
 ```js
 class App extends React.Component<any, any> {
