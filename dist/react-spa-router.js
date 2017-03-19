@@ -1,5 +1,5 @@
 /*!
- * React Spa Router v0.0.2
+ * React Spa Router v0.0.3
  * (c) 2017 romagny13
  * Released under the MIT License.
  */
@@ -840,7 +840,7 @@ var Router = (function () {
             config.mode = 'hash';
         }
         if (!isValidMode(config.mode)) {
-            throw new Error('Invalid mode (hash or html5)');
+            throw new Error('Invalid mode (hash or history)');
         }
         if (config.mode === 'history' && !supportHistory) {
             config.mode = 'hash';
@@ -992,8 +992,8 @@ var Link = (function (_super) {
     function Link(props) {
         var _this = _super.call(this, props) || this;
         _this._base = getBase();
-        var fullLinkPathString = getFullLinkPathString(_this.props.to);
-        _this._fullLinkPathString = routerHistory && routerHistory instanceof HashHistory ? '#' + fullLinkPathString : fullLinkPathString;
+        _this._fullLinkPathString = getFullLinkPathString(_this.props.to);
+        _this._linkHref = routerHistory && routerHistory instanceof HashHistory ? '#' + _this._fullLinkPathString : _this._fullLinkPathString;
         var fullCurrentPathString = getFullCurrentPathString(_this._base);
         var isActive = _this.props.activeClassName ?
             checkIsActive(fullCurrentPathString, _this._fullLinkPathString, _this.props.exact, _this.props.activePattern)
@@ -1023,11 +1023,11 @@ var Link = (function (_super) {
     Link.prototype.render = function () {
         var className = getClassName(this.state.isActive, this.props.className, this.props.activeClassName);
         if (this.props.tag) {
-            var props = { id: this.props.id, href: this._fullLinkPathString, onClick: this.onClick, className: this.props.className, style: this.props.style };
+            var props = { id: this.props.id, href: this._linkHref, onClick: this.onClick, className: this.props.className, style: this.props.style };
             return React.createElement(this.props.tag, { className: className }, React.createElement('a', props, this.props.children));
         }
         else {
-            var props = { id: this.props.id, href: this._fullLinkPathString, onClick: this.onClick, className: className, style: this.props.style };
+            var props = { id: this.props.id, href: this._linkHref, onClick: this.onClick, className: className, style: this.props.style };
             return React.createElement('a', props, this.props.children);
         }
     };

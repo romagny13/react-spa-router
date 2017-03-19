@@ -62,7 +62,7 @@ export class Router {
 
         // history
         if (isUndefined(config.mode)) { config.mode = 'hash'; }
-        if (!isValidMode(config.mode)) { throw new Error('Invalid mode (hash or html5)'); }
+        if (!isValidMode(config.mode)) { throw new Error('Invalid mode (hash or history)'); }
         if (config.mode === 'history' && !supportHistory) {
             config.mode = 'hash';
             console.warn('Html5 history not supported: switch to hash mode.');

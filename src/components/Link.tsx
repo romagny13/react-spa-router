@@ -60,12 +60,13 @@ export class Link extends React.Component<any, any> {
         exact: true
     };
     _base: string;
+    _linkHref: any;
     _fullLinkPathString: string;
     constructor(props) {
         super(props);
         this._base = getBase();
-        let fullLinkPathString = getFullLinkPathString(this.props.to);
-        this._fullLinkPathString = routerHistory && routerHistory instanceof HashHistory ? '#' + fullLinkPathString : fullLinkPathString;
+        this._fullLinkPathString = getFullLinkPathString(this.props.to);
+        this._linkHref = routerHistory && routerHistory instanceof HashHistory ? '#' + this._fullLinkPathString : this._fullLinkPathString;
 
         let fullCurrentPathString = getFullCurrentPathString(this._base);
         let isActive = this.props.activeClassName ?
@@ -97,11 +98,11 @@ export class Link extends React.Component<any, any> {
     render() {
         let className = getClassName(this.state.isActive, this.props.className, this.props.activeClassName);
         if (this.props.tag) {
-            let props = { id: this.props.id, href: this._fullLinkPathString, onClick: this.onClick, className: this.props.className, style: this.props.style };
+            let props = { id: this.props.id, href: this._linkHref, onClick: this.onClick, className: this.props.className, style: this.props.style };
             return React.createElement(this.props.tag, { className }, React.createElement('a', props, this.props.children));
         }
         else {
-            let props = { id: this.props.id, href: this._fullLinkPathString, onClick: this.onClick, className, style: this.props.style };
+            let props = { id: this.props.id, href: this._linkHref, onClick: this.onClick, className, style: this.props.style };
             return React.createElement('a', props, this.props.children);
         }
     }
