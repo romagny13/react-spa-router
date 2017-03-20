@@ -151,9 +151,16 @@ const routes = [
                         console.log('receive result', result);
                         // with promise
                         return new Promise((resolve) => {
+                           throw 'Error result 4';
+                        });
+                    },
+                    ({ result, error }) => {
+                        console.log('receive error', error);
+                        // with promise
+                        return new Promise((resolve) => {
                             setTimeout(() => {
-                                console.log('result 4');
-                                resolve('result 4');
+                                console.log('result 5');
+                                resolve('result 5');
                             }, 1000);
                         });
                     },

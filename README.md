@@ -53,6 +53,13 @@ query |  query object
 fragment | fragment
 matched | matched Route config
 
+Action parameters | Description
+-------- |  --------
+route |  resolved route
+router | router
+result | previous action result
+error | previous action error / rejection
+
 <img src="http://res.cloudinary.com/romagny13/image/upload/v1483654173/captureurl_ejcmab.png" />
 
 Example create routes
@@ -86,13 +93,13 @@ const routes = [
 ];
 ```
 
-An action return the previous promise result. Example:
+An action return the previous action result (or error / rejection). Example:
 ```js
 const routes = [
     {
         path: '/', actions: [
             () => 'My result',
-            ({ router, route, result }) => console.log(router, route, result)
+            ({ router, route, result, error }) => console.log(router, route, result)
         ]
     }
 ];

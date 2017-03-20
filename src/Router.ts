@@ -36,14 +36,24 @@ export function clearRoutesInternal() {
 function doActions(actions, route, router, onComplete) {
     let length = actions.length,
         index = 0,
-        result;
+        result,
+        error;
+
+    function checkEnd() {
+        index++;
+        if (index < length) { next(actions[index]); }
+        else if (onComplete) { onComplete(); }
+    }
 
     function next(action) {
-        action({ route, router, result }, (actionResult) => {
+        action({ route, router, result, error }, (actionResult) => {
             result = actionResult;
-            index++;
-            if (index < length) { next(actions[index]); }
-            else if (onComplete) { onComplete(); }
+            error = undefined;
+            checkEnd();
+        }, (err) => {
+            result = undefined;
+            error = err;
+            checkEnd();
         });
     }
 

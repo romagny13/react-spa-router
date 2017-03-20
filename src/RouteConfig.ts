@@ -31,12 +31,16 @@ export function getActions(config: any): Array<Function> {
 
 export function createAction(action: Function): Function {
     /* create a function with params to pass to real action that could be called */
-    return (params, next) => {
-        let result = action(params);
-        if (isPromise(result)) {
-            result.then(next);
+    return (params, next, onError) => {
+        try {
+            let result = action(params);
+            if (isPromise(result)) {
+                result.then(next, onError);
+            }
+            else { next(result); }
+        } catch (error) {
+            onError(error);
         }
-        else { next(result); }
     };
 }
 

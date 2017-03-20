@@ -1,5 +1,5 @@
 /*!
- * React Spa Router v0.0.3
+ * React Spa Router v0.0.5
  * (c) 2017 romagny13
  * Released under the MIT License.
  */
@@ -688,13 +688,18 @@ function getActions(config) {
 }
 function createAction(action) {
     /* create a function with params to pass to real action that could be called */
-    return function (params, next) {
-        var result = action(params);
-        if (isPromise(result)) {
-            result.then(next);
+    return function (params, next, onError) {
+        try {
+            var result = action(params);
+            if (isPromise(result)) {
+                result.then(next, onError);
+            }
+            else {
+                next(result);
+            }
         }
-        else {
-            next(result);
+        catch (error) {
+            onError(error);
         }
     };
 }
@@ -807,17 +812,25 @@ function addRoutesInternal(routeConfigs) {
 }
 
 function doActions(actions, route, router, onComplete) {
-    var length = actions.length, index = 0, result;
+    var length = actions.length, index = 0, result, error;
+    function checkEnd() {
+        index++;
+        if (index < length) {
+            next(actions[index]);
+        }
+        else if (onComplete) {
+            onComplete();
+        }
+    }
     function next(action) {
-        action({ route: route, router: router, result: result }, function (actionResult) {
+        action({ route: route, router: router, result: result, error: error }, function (actionResult) {
             result = actionResult;
-            index++;
-            if (index < length) {
-                next(actions[index]);
-            }
-            else if (onComplete) {
-                onComplete();
-            }
+            error = undefined;
+            checkEnd();
+        }, function (err) {
+            result = undefined;
+            error = err;
+            checkEnd();
         });
     }
     if (length > 0) {
