@@ -402,7 +402,7 @@ class AuthGuard {
       next(true);
     }
     else {
-      // add a query with the url to redirect after user logged in
+      // add a query string with the url to redirect after the user will be logged in
       next('/signin?redirect=' + route.url);
     }
   }
@@ -414,7 +414,7 @@ Routes
 ```js
 const routes = [
   { path: '/', action: () => viewRender(<Home />), canActivate: [AuthGuard] },
-  // Inject the router and the route to component
+  // inject the router and the route to the component
   { path: '/signin', action: ({ router, route }) => viewRender(<Signin router={router} route={route} />) }
 ];
 ```
