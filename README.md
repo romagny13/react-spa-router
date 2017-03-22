@@ -426,10 +426,10 @@ class Signin extends Component {
   onSubmit(event) {
     event.preventDefault();
     const { email, password } = this.state;
-    auth.loggin(email, password).then(() => {
+    auth.login(email, password).then(() => {
       // get redirect url from query
       let redirect = this.props.route.query.redirect;
-      // use replace to replace signin page in history by redirect url
+      // replace signin page in history by redirect url
       this.props.router.replaceUrl(redirect);
     });
   }
