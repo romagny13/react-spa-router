@@ -5,7 +5,7 @@ import { viewRender, RouterView } from '../src/components/RouterView';
 import { Link } from '../src/components/Link';
 
 class MyGuard {
-    canActivate(from, to, next) {
+    canActivate(to, next) {
         let result = confirm('Activate?');
         next(result);
     }
