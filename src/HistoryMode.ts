@@ -11,7 +11,7 @@ export abstract class HistoryMode {
     _onSuccessSubscribers: Function[];
     _onErrorSubscribers: Function[];
     current: any;
-    baseHref: string;
+    base: string;
     constructor() {
         /*
             load
@@ -23,8 +23,8 @@ export abstract class HistoryMode {
         this._routeResolver = new RouteResolver();
         this._guard = new Guard();
 
-        this.baseHref = getBase();
-        this.current = new Route({ path: '/', url: this.baseHref });
+        this.base = getBase();
+        this.current = new Route({ path: '/', url: this.base });
     }
 
     _onSuccess(to) {
@@ -71,12 +71,12 @@ export abstract class HistoryMode {
     }
 
     go(source: string): void {
-        let url = this.getUrl(this.baseHref, source);
+        let url = this.getUrl(this.base, source);
         this.onDemand(url);
     }
 
     replace(source: string): void {
-        let url = this.getUrl(this.baseHref, source);
+        let url = this.getUrl(this.base, source);
         this.onDemand(url, true);
     }
 
@@ -98,6 +98,5 @@ export abstract class HistoryMode {
     abstract onChange(fn: Function): void;
     abstract onDemand(url: string, replace?: boolean): any;
     abstract run(): void;
-    abstract getPath(baseHref: string, url: string): string;
-    abstract getUrl(baseHref: string, source: string): string;
+    abstract getUrl(base: string, urlOrPath: string): string;
 }

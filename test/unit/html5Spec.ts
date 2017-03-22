@@ -1,6 +1,7 @@
 import { assert } from 'chai';
 import { addRoutesInternal, clearRoutesInternal } from '../../src/Router';
 import { Html5History } from '../../src/Html5History';
+import { getPathOnly } from '../../src/util/url';
 
 /*
 should notify on load
@@ -15,7 +16,7 @@ Should reset url on cancel after url changed
 */
 describe('Html5 history', () => {
 
-    let html5History,
+    let html5History: Html5History,
         base: HTMLElement,
         link: HTMLElement,
         subscriber,
@@ -56,7 +57,7 @@ describe('Html5 history', () => {
     after(() => {
         base.parentElement.removeChild(base);
         link.parentElement.removeChild(link);
-        window.history.replaceState(null, document.title, html5History.baseHref);
+        window.history.replaceState(null, document.title, html5History.base);
         subscriber = null;
         guardCallback = null;
         html5History = null;
@@ -160,13 +161,13 @@ describe('Html5 history', () => {
 
     it('Should get path from path', () => {
         let baseHref = 'http://mysite.com/';
-        let result = html5History.getPath(baseHref, '/posts/10');
+        let result = getPathOnly(baseHref, '/posts/10');
         assert.equal(result, '/posts/10');
     });
 
     it('Should get path from url', () => {
         let baseHref = 'http://mysite.com/';
-        let result = html5History.getPath(baseHref, 'http://mysite.com/posts/10');
+        let result = getPathOnly(baseHref, 'http://mysite.com/posts/10');
         assert.equal(result, '/posts/10');
     });
 

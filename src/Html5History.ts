@@ -1,8 +1,8 @@
 import { HistoryMode } from './HistoryMode';
-import { trimQueryAndFragment } from './util';
+import { getPathOnly } from './util/url';
 
 function formatUrl(value: string): string {
-    // format base path url 'http://localhost:3000/' -> 'http://localhost:3000' in order to add short url
+    // format base 'http://mysite.com/' => 'http://mysite.com' in order to add path
     return value.replace(/\/$/, '');
 }
 
@@ -13,13 +13,16 @@ export class Html5History extends HistoryMode {
 
     onLoad(fn: Function): void {
         let url = window.location.href;
-        let path = this.getPath(this.baseHref, url);
+        let path = getPathOnly(this.base, url);
         fn({ url, path });
     }
 
     onChange(fn: Function): void {
         window.onpopstate = (e) => {
-            fn(e.state);
+            // state is null when we click on a link with an anchor
+            if (e.state) {
+                fn(e.state);
+            }
         };
     }
 
@@ -35,7 +38,7 @@ export class Html5History extends HistoryMode {
     }
 
     onDemand(url: string, replace?: boolean): void {
-        let path = this.getPath(this.baseHref, url);
+        let path = getPathOnly(this.base, url);
         this.check(url, path, replace, (to) => {
             this.current = to;
             if (replace) { window.history.replaceState(this.getState(), null, url); }
@@ -55,7 +58,7 @@ export class Html5History extends HistoryMode {
                 this._onSuccess(to);
             }, (event) => {
                 // Error
-               this._onError(event);
+                this._onError(event);
             });
         });
 
@@ -68,30 +71,7 @@ export class Html5History extends HistoryMode {
         return { url: this.current.url, path: this.current.path, name: this.current.name };
     }
 
-    getPath(baseHref: string, url: string): string {
-        /*
-            base path:
-            - http://mysite.com/
-            home:
-            - http://mysite.com/ --> remove base path ''
-            other:
-            - http://mysite.com/posts/10 --> remove base path 'posts/10'
-        */
-        if (url.indexOf(baseHref) !== -1) {
-            let replacement = /\/$/.test(baseHref) ? '/' : '';
-            let result = url.replace(baseHref, replacement);
-            if (result === '') { return '/'; }
-            else {
-                return trimQueryAndFragment(result);
-            }
-        }
-        else {
-            return trimQueryAndFragment(url);
-        }
-    }
-
-    getUrl(baseHref: string, source: string): string {
-        // source is path or url ?
-        return source.indexOf(baseHref) !== -1 ? source : formatUrl(baseHref) + source;
+    getUrl(base: string, urlOrPath: string): string {
+        return urlOrPath.indexOf(base) !== -1 ? urlOrPath : formatUrl(base) + urlOrPath;
     }
 }

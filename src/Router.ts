@@ -5,6 +5,7 @@ import { HashHistory } from './HashHistory';
 import { RouteConfig, getActions } from './RouteConfig';
 import { Route } from './Route';
 import { routerMessenger } from './RouterMessenger';
+import { doLater } from './util/types';
 
 function isValidMode(value: string): boolean {
     return /^(hash|history)$/.test(value);
@@ -114,10 +115,12 @@ export class Router {
             this._doBeforeEach(() => {
                 let actions = getActions(config);
                 doActions(actions, route, this, () => {
-                    if (route.fragment && this._scroll) {
-                        scrollToElement(route.fragment);
-                    }
                     if (this._afterEachHook) { this._afterEachHook(route); }
+                    doLater(() => {
+                        if (route.fragment && this._scroll) {
+                            scrollToElement(route.fragment);
+                        }
+                    });
                 });
             });
         }, (event) => {

@@ -1,6 +1,7 @@
 import { assert } from 'chai';
 import { addRoutesInternal, clearRoutesInternal } from '../../src/Router';
 import { HashHistory } from '../../src/HashHistory';
+import { getPathOnly } from '../../src/util/url';
 
 /*
 Should notify on load
@@ -58,7 +59,7 @@ describe('Hash history', () => {
     after(() => {
         base.parentElement.removeChild(base);
         link.parentElement.removeChild(link);
-        window.history.replaceState(null, document.title, hashHistory.baseHref);
+        window.history.replaceState(null, document.title, hashHistory.base);
         subscriber = null;
         guardCallback = null;
         hashHistory = null;
@@ -179,13 +180,13 @@ describe('Hash history', () => {
 
     it('Should get path from path', () => {
         let baseHref = 'http://mysite.com/';
-        let result = hashHistory.getPath(baseHref, '/posts/10');
+        let result = getPathOnly(baseHref, '/posts/10');
         assert.equal(result, '/posts/10');
     });
 
     it('Should get path from url', () => {
         let baseHref = 'http://mysite.com/';
-        let result = hashHistory.getPath(baseHref, 'http://mysite.com/#/posts/10');
+        let result = getPathOnly(baseHref, 'http://mysite.com/#/posts/10');
         assert.equal(result, '/posts/10');
     });
 });

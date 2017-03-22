@@ -35,7 +35,16 @@ export function convertToFullPathString(path: string, query?: any, fragment?: st
     return result;
 }
 
+export function convertToFullPathStringWithQueryString(path, queryString, fragment) {
+    // path with params + query string + fragment
+    let fullPath = path;
+    if (isString(queryString)) { fullPath += queryString; }
+    if (isString(fragment)) { fullPath += formatFragment(fragment); }
+    return fullPath;
+}
+
 export function convertToPathString(routePath: string, params: any) {
+    // path + params
     return routePath.replace(/:(\w+)(\([^\)]+\))?/g, (match, param, paramMatch) => {
         if (params.hasOwnProperty(param)) { return params[param]; }
         else { throw new Error('Parameter ' + param + ' not found'); }

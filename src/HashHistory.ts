@@ -1,6 +1,7 @@
 import { HistoryMode } from './HistoryMode';
 import { Route } from './Route';
-import { trimQueryAndFragment } from './util';
+import { trimBase, getPathOnly } from './util/url';
+import { convertToFullPathStringWithQueryString } from './util/path';
 
 export class HashHistory extends HistoryMode {
     _isChecked: boolean;
@@ -10,14 +11,14 @@ export class HashHistory extends HistoryMode {
 
     onLoad(fn: Function): void {
         let url = window.location.href;
-        let path = this.getPath(this.baseHref, url);
+        let path = getPathOnly(this.base, url);
         fn({ url, path });
     }
 
     onChange(fn: Function): void {
         window.onhashchange = () => {
             let url = window.location.href;
-            let path = this.getPath(this.baseHref, url);
+            let path = getPathOnly(this.base, url);
             fn({ url, path });
         };
     }
@@ -28,18 +29,18 @@ export class HashHistory extends HistoryMode {
             this._onSuccess(to);
         }, (event) => {
             // Error
-            window.location.hash = this.getFullHash(this.current);
+            window.location.hash = convertToFullPathStringWithQueryString(this.current.path, this.current.queryString, this.current.fragment);
             if (this._onError) { this._onError(event); }
         });
     }
 
     onDemand(url: string, replace?: boolean): void {
-        let path = this.getPath(this.baseHref, url);
+        let path = getPathOnly(this.base, url);
         this.check(url, path, replace, (to) => {
             this._isChecked = true;
             this.current = to;
             if (replace) { window.location.replace(url); }
-            else { window.location.hash = this.getFullHash(to); }
+            else { window.location.hash = convertToFullPathStringWithQueryString(to.path, to.queryString, to.fragment); }
             this._onSuccess(to);
         }, (event) => {
             // Error
@@ -58,43 +59,7 @@ export class HashHistory extends HistoryMode {
         });
     }
 
-    getFullHash(route: Route): string {
-        let fullHash = route.path;
-        fullHash += route.queryString || '';
-        fullHash += route.fragment || '';
-        return fullHash;
-    }
-
-    getPath(baseHref: string, url: string): string {
-        /*
-            base path:
-            - http://mysite.com/ or http://mysite.com/index.html
-            home:
-            - http://mysite.com/ --> remove base path ''
-            - or http://mysite.com/#/ --> remove base path '#/'
-            - http://mysite.com/index.html --> remove base path ''
-            - or http://mysite.com/index.html#/ --> remove base path '#/'
-            other:
-            - http://mysite.com/#/posts/10 --> remove base path '#/posts/10'
-            - http://mysite.com/index.html#/posts/10 --> idem
-        */
-
-        let result;
-        if (url.indexOf(baseHref) !== -1) {
-            result = url.replace(baseHref, '');
-            if (result === '') { return '/'; }
-            else {
-                if (result.charAt(0) === '#') { result = result.slice(1); }
-                return trimQueryAndFragment(result);
-            }
-        }
-        else {
-            return trimQueryAndFragment(url);
-        }
-    }
-
-    getUrl(baseHref: string, source: string): string {
-        // source is path or url ?
-        return source.indexOf(baseHref) !== -1 ? source : baseHref + '#' + source;
+    getUrl(base: string, urlOrPath: string): string {
+        return urlOrPath.indexOf(base) !== -1 ? urlOrPath : base + '#' + urlOrPath;
     }
 }

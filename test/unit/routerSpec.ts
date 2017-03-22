@@ -106,7 +106,6 @@ describe('Router tests', function () {
     });
 
     it('Should call before each and after each', (done) => {
-
         let beforeCalled = false;
         router.beforeEach((next) => {
             beforeCalled = true;
@@ -129,7 +128,7 @@ describe('Router tests', function () {
 
         router.afterEach(() => {
             assert.fail();
-        });
+        }).run();
 
         router.navigateTo('home');
         setTimeout(function () {

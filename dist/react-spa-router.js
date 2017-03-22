@@ -1,5 +1,5 @@
 /*!
- * React Spa Router v0.0.5
+ * React Spa Router v0.0.6
  * (c) 2017 romagny13
  * Released under the MIT License.
  */
@@ -89,7 +89,19 @@ function convertToFullPathString(path, query, fragment) {
     }
     return result;
 }
+function convertToFullPathStringWithQueryString(path, queryString, fragment) {
+    // path with params + query string + fragment
+    var fullPath = path;
+    if (isString(queryString)) {
+        fullPath += queryString;
+    }
+    if (isString(fragment)) {
+        fullPath += formatFragment(fragment);
+    }
+    return fullPath;
+}
 function convertToPathString(routePath, params) {
+    // path + params
     return routePath.replace(/:(\w+)(\([^\)]+\))?/g, function (match, param, paramMatch) {
         if (params.hasOwnProperty(param)) {
             return params[param];
@@ -101,10 +113,27 @@ function convertToPathString(routePath, params) {
 }
 
 function trimBase(base, url) {
-    // base => http://localhost:3000
-    // url => http://localhost:3000/posts/10?q=mysearch#section1
-    // return => /posts/10?q=mysearch#section1
-    return url.replace(base, '');
+    /*
+    BASE                                | HOME
+    - http://mysite.com (origin)        | http://mysite.com/ or http://mysite.com/#/                        | http://mysite.com/posts/10 or http://mysite.com/#/posts/10
+    - http://mysite.com/ (base tag)     | http://mysite.com/ or http://mysite.com/#/                        | http://mysite.com/posts/10 or http://mysite.com/#/posts/10
+    - http://mysite.com/blog            | http://mysite.com/blog                                            | http://mysite.com/blog/posts/10 or http://mysite.com/blog/#/posts/10
+    - http://mysite.com/index.html      | http://mysite.com/index.html or http://mysite.com/index.html#/    | http://mysite.com/index.html#/posts/10
+                                        => '' or '/' or '/#/' or '#/' ==> '/'                                => 'posts/10' or  '/#/posts/10' or '#/posts/10' ==> '/posts/10'
+    */
+    var fullPath = url.replace(base, '');
+    if (fullPath === '') {
+        return '/';
+    }
+    else {
+        // remove # or /#
+        fullPath = fullPath.replace(/^(\/#|#)/, '');
+        // add /
+        if (fullPath.charAt(0) !== '/') {
+            fullPath = '/' + fullPath;
+        }
+        return fullPath;
+    }
 }
 function trimQueryAndFragment(url) {
     if (url.indexOf('?') !== -1) {
@@ -116,6 +145,12 @@ function trimQueryAndFragment(url) {
         url = url.split('#')[0];
     }
     return url;
+}
+function getPathOnly(base, url) {
+    // full path
+    var path = trimBase(base, url);
+    // trim query and fragment
+    return trimQueryAndFragment(path);
 }
 
 var Route = (function () {
@@ -373,8 +408,8 @@ var HistoryMode = (function () {
         this._onErrorSubscribers = [];
         this._routeResolver = new RouteResolver();
         this._guard = new Guard();
-        this.baseHref = getBase();
-        this.current = new Route({ path: '/', url: this.baseHref });
+        this.base = getBase();
+        this.current = new Route({ path: '/', url: this.base });
     }
     HistoryMode.prototype._onSuccess = function (to) {
         this._onSuccessSubscribers.forEach(function (subscriber) {
@@ -430,11 +465,11 @@ var HistoryMode = (function () {
         }
     };
     HistoryMode.prototype.go = function (source) {
-        var url = this.getUrl(this.baseHref, source);
+        var url = this.getUrl(this.base, source);
         this.onDemand(url);
     };
     HistoryMode.prototype.replace = function (source) {
-        var url = this.getUrl(this.baseHref, source);
+        var url = this.getUrl(this.base, source);
         this.onDemand(url, true);
     };
     HistoryMode.prototype.back = function () {
@@ -454,7 +489,7 @@ var HistoryMode = (function () {
 }());
 
 function formatUrl(value) {
-    // format base path url 'http://localhost:3000/' -> 'http://localhost:3000' in order to add short url
+    // format base 'http://mysite.com/' => 'http://mysite.com' in order to add path
     return value.replace(/\/$/, '');
 }
 var Html5History = (function (_super) {
@@ -464,12 +499,15 @@ var Html5History = (function (_super) {
     }
     Html5History.prototype.onLoad = function (fn) {
         var url = window.location.href;
-        var path = this.getPath(this.baseHref, url);
+        var path = getPathOnly(this.base, url);
         fn({ url: url, path: path });
     };
     Html5History.prototype.onChange = function (fn) {
         window.onpopstate = function (e) {
-            fn(e.state);
+            // state is null when we click on a link with an anchor
+            if (e.state) {
+                fn(e.state);
+            }
         };
     };
     Html5History.prototype.checkChanged = function (infos) {
@@ -487,7 +525,7 @@ var Html5History = (function (_super) {
     };
     Html5History.prototype.onDemand = function (url, replace) {
         var _this = this;
-        var path = this.getPath(this.baseHref, url);
+        var path = getPathOnly(this.base, url);
         this.check(url, path, replace, function (to) {
             _this.current = to;
             if (replace) {
@@ -521,32 +559,8 @@ var Html5History = (function (_super) {
     Html5History.prototype.getState = function () {
         return { url: this.current.url, path: this.current.path, name: this.current.name };
     };
-    Html5History.prototype.getPath = function (baseHref, url) {
-        /*
-            base path:
-            - http://mysite.com/
-            home:
-            - http://mysite.com/ --> remove base path ''
-            other:
-            - http://mysite.com/posts/10 --> remove base path 'posts/10'
-        */
-        if (url.indexOf(baseHref) !== -1) {
-            var replacement = /\/$/.test(baseHref) ? '/' : '';
-            var result = url.replace(baseHref, replacement);
-            if (result === '') {
-                return '/';
-            }
-            else {
-                return trimQueryAndFragment(result);
-            }
-        }
-        else {
-            return trimQueryAndFragment(url);
-        }
-    };
-    Html5History.prototype.getUrl = function (baseHref, source) {
-        // source is path or url ?
-        return source.indexOf(baseHref) !== -1 ? source : formatUrl(baseHref) + source;
+    Html5History.prototype.getUrl = function (base, urlOrPath) {
+        return urlOrPath.indexOf(base) !== -1 ? urlOrPath : formatUrl(base) + urlOrPath;
     };
     return Html5History;
 }(HistoryMode));
@@ -558,14 +572,14 @@ var HashHistory = (function (_super) {
     }
     HashHistory.prototype.onLoad = function (fn) {
         var url = window.location.href;
-        var path = this.getPath(this.baseHref, url);
+        var path = getPathOnly(this.base, url);
         fn({ url: url, path: path });
     };
     HashHistory.prototype.onChange = function (fn) {
         var _this = this;
         window.onhashchange = function () {
             var url = window.location.href;
-            var path = _this.getPath(_this.baseHref, url);
+            var path = getPathOnly(_this.base, url);
             fn({ url: url, path: path });
         };
     };
@@ -576,7 +590,7 @@ var HashHistory = (function (_super) {
             _this._onSuccess(to);
         }, function (event) {
             // Error
-            window.location.hash = _this.getFullHash(_this.current);
+            window.location.hash = convertToFullPathStringWithQueryString(_this.current.path, _this.current.queryString, _this.current.fragment);
             if (_this._onError) {
                 _this._onError(event);
             }
@@ -584,7 +598,7 @@ var HashHistory = (function (_super) {
     };
     HashHistory.prototype.onDemand = function (url, replace) {
         var _this = this;
-        var path = this.getPath(this.baseHref, url);
+        var path = getPathOnly(this.base, url);
         this.check(url, path, replace, function (to) {
             _this._isChecked = true;
             _this.current = to;
@@ -592,7 +606,7 @@ var HashHistory = (function (_super) {
                 window.location.replace(url);
             }
             else {
-                window.location.hash = _this.getFullHash(to);
+                window.location.hash = convertToFullPathStringWithQueryString(to.path, to.queryString, to.fragment);
             }
             _this._onSuccess(to);
         }, function (event) {
@@ -616,45 +630,8 @@ var HashHistory = (function (_super) {
             }
         });
     };
-    HashHistory.prototype.getFullHash = function (route) {
-        var fullHash = route.path;
-        fullHash += route.queryString || '';
-        fullHash += route.fragment || '';
-        return fullHash;
-    };
-    HashHistory.prototype.getPath = function (baseHref, url) {
-        /*
-            base path:
-            - http://mysite.com/ or http://mysite.com/index.html
-            home:
-            - http://mysite.com/ --> remove base path ''
-            - or http://mysite.com/#/ --> remove base path '#/'
-            - http://mysite.com/index.html --> remove base path ''
-            - or http://mysite.com/index.html#/ --> remove base path '#/'
-            other:
-            - http://mysite.com/#/posts/10 --> remove base path '#/posts/10'
-            - http://mysite.com/index.html#/posts/10 --> idem
-        */
-        var result;
-        if (url.indexOf(baseHref) !== -1) {
-            result = url.replace(baseHref, '');
-            if (result === '') {
-                return '/';
-            }
-            else {
-                if (result.charAt(0) === '#') {
-                    result = result.slice(1);
-                }
-                return trimQueryAndFragment(result);
-            }
-        }
-        else {
-            return trimQueryAndFragment(url);
-        }
-    };
-    HashHistory.prototype.getUrl = function (baseHref, source) {
-        // source is path or url ?
-        return source.indexOf(baseHref) !== -1 ? source : baseHref + '#' + source;
+    HashHistory.prototype.getUrl = function (base, urlOrPath) {
+        return urlOrPath.indexOf(base) !== -1 ? urlOrPath : base + '#' + urlOrPath;
     };
     return HashHistory;
 }(HistoryMode));
@@ -899,12 +876,14 @@ var Router = (function () {
             _this._doBeforeEach(function () {
                 var actions = getActions(config);
                 doActions(actions, route, _this, function () {
-                    if (route.fragment && _this._scroll) {
-                        scrollToElement(route.fragment);
-                    }
                     if (_this._afterEachHook) {
                         _this._afterEachHook(route);
                     }
+                    doLater(function () {
+                        if (route.fragment && _this._scroll) {
+                            scrollToElement(route.fragment);
+                        }
+                    });
                 });
             });
         }, function (event) {

@@ -116,6 +116,68 @@ describe('Utils', () => {
     });
 
     describe('Url', () => {
+        /*
+              BASE                                | HOME
+              - http://mysite.com (origin)        | http://mysite.com/ or http://mysite.com/#/                        | http://mysite.com/posts/10 or http://mysite.com/#/posts/10
+              - http://mysite.com/ (base tag)     | http://mysite.com/ or http://mysite.com/#/                        | http://mysite.com/posts/10 or http://mysite.com/#/posts/10
+              - http://mysite.com/blog            | http://mysite.com/blog                                            | http://mysite.com/blog/posts/10 or http://mysite.com/blog/#/posts/10
+              - http://mysite.com/index.html      | http://mysite.com/index.html or http://mysite.com/index.html#/    | http://mysite.com/index.html#/posts/10
+                                                  => '' or '/' or '/#/' or '#/' ==> '/'                                => 'posts/10' or '#/posts/10' ==> '/posts/10'
+        */
+        it('Should trim base with no end slash', () => {
+            let result = trimBase('http://mysite.com', 'http://mysite.com/');
+            assert.equal(result, '/');
+        });
+
+        it('Should trim base with end slash', () => {
+            let result = trimBase('http://mysite.com/', 'http://mysite.com/');
+            assert.equal(result, '/');
+        });
+
+        it('Should trim base with no end slash (base) and  #/ (url)', () => {
+            let result = trimBase('http://mysite.com', 'http://mysite.com/#/');
+            assert.equal(result, '/');
+        });
+
+        it('Should trim base with end #/', () => {
+            let result = trimBase('http://mysite.com/', 'http://mysite.com/#/');
+            assert.equal(result, '/');
+        });
+
+        it('Should trim base with pathname', () => {
+            let result = trimBase('http://mysite.com/blog', 'http://mysite.com/blog');
+            assert.equal(result, '/');
+        });
+
+        it('Should trim base with file + extension', () => {
+            let result = trimBase('http://mysite.com/index.html', 'http://mysite.com/index.html');
+            assert.equal(result, '/');
+        });
+
+        it('Should trim base with no end slash (base) and return /posts/10', () => {
+            let result = trimBase('http://mysite.com', 'http://mysite.com/posts/10');
+            assert.equal(result, '/posts/10');
+        });
+
+        it('Should trim base with end slash (base) and return /posts/10', () => {
+            let result = trimBase('http://mysite.com/', 'http://mysite.com/posts/10');
+            assert.equal(result, '/posts/10');
+        });
+
+        it('Should trim base with no end slash (base) + hash (url) and return /posts/10', () => {
+            let result = trimBase('http://mysite.com', 'http://mysite.com/#/posts/10');
+            assert.equal(result, '/posts/10');
+        });
+
+        it('Should trim base with end slash (base) + hash (url) and return /posts/10', () => {
+            let result = trimBase('http://mysite.com/', 'http://mysite.com/#/posts/10');
+            assert.equal(result, '/posts/10');
+        });
+
+        it('Should trim base with file + extension + hash (url) and return /posts/10', () => {
+            let result = trimBase('http://mysite.com/index.html', 'http://mysite.com/index.html#/posts/10');
+            assert.equal(result, '/posts/10');
+        });
 
         it('Should get base tag href', () => {
             let result = trimBase('http://localhost/test', 'http://localhost/test/posts');
@@ -133,35 +195,36 @@ describe('Utils', () => {
             let result = trimQueryAndFragment(url);
             assert.equal(result, 'http://localhost/test/posts/10');
         });
+
     });
 
-  /*  describe('Scroll', () => {
-
-        let separator,
-            anchor;
-        before(() => {
-            separator = document.createElement('div');
-            separator.style = 'height:5000px';
-            document.body.appendChild(separator);
-
-            anchor = document.createElement('div');
-            anchor.setAttribute('id', 'section1');
-            document.body.appendChild(anchor);
-        });
-
-        after(() => {
-            separator.parentElement.removeChild(separator);
-            anchor.parentElement.removeChild(anchor);
-        });
-
-        it('Should scroll to fragment', () => {
-            scrollToElement('#section1');
-            setTimeout(() => {
-                let elRect = anchor.getBoundingClientRect();
-                assert.isTrue(elRect.top > 5000);
-            }, 500);
-        });
-
-    });*/
+    /*  describe('Scroll', () => {
+  
+          let separator,
+              anchor;
+          before(() => {
+              separator = document.createElement('div');
+              separator.style = 'height:5000px';
+              document.body.appendChild(separator);
+  
+              anchor = document.createElement('div');
+              anchor.setAttribute('id', 'section1');
+              document.body.appendChild(anchor);
+          });
+  
+          after(() => {
+              separator.parentElement.removeChild(separator);
+              anchor.parentElement.removeChild(anchor);
+          });
+  
+          it('Should scroll to fragment', () => {
+              scrollToElement('#section1');
+              setTimeout(() => {
+                  let elRect = anchor.getBoundingClientRect();
+                  assert.isTrue(elRect.top > 5000);
+              }, 500);
+          });
+  
+      });*/
 
 });
