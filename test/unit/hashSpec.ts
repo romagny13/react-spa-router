@@ -29,7 +29,7 @@ describe('Hash history', () => {
     }
 
     class MyGuard {
-        canActivate(route, next) {
+        canActivate(to, next) {
             next(false);
         }
     }

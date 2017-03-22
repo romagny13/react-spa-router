@@ -1,9 +1,8 @@
-import { isString, isDefined, isUndefined, getBase } from './util';
+import { isString, isFunction, isDefined, isUndefined, getBase } from './util';
 import { RouteResolver } from './RouteResolver';
 import { Route } from './Route';
 import { Guard } from './Guard';
 import { routes, activeComponents } from './Router';
-import { isFunction } from './util/types';
 
 export abstract class HistoryMode {
     _routeResolver: RouteResolver;
@@ -56,27 +55,29 @@ export abstract class HistoryMode {
             // check
             if (isUndefined(route.matched)) {
                 // notfound
-                this._guard.checkCanDeactivate(this.current, route, activeComponents, (canContinue) => {
-                    if (canContinue) { onError({ type: 'notfound', route }); }
-                    else { onError({ type: 'aborted', route }); }
+                this._guard.checkCanDeactivate(this.current, route, activeComponents, (response) => {
+                    if (isString(response)) { this.redirectTo(response); }
+                    else if (response === false) { onError({ type: 'aborted', route }); }
+                    else { onError({ type: 'notfound', route }); }
                 });
             }
             else {
-                this._guard.approve(this.current, route, activeComponents, (canContinue) => {
-                    if (canContinue) { onSuccess(route); }
-                    else { onError({ type: 'aborted', route }); }
+                this._guard.approve(this.current, route, activeComponents, (response) => {
+                    if (isString(response)) { this.redirectTo(response); }
+                    else if (response === false) { onError({ type: 'aborted', route }); }
+                    else { onSuccess(route); }
                 });
             }
         }
     }
 
-    go(source: string): void {
-        let url = this.getUrl(this.base, source);
+    go(urlOrPath: string): void {
+        let url = this.getUrl(this.base, urlOrPath);
         this.onDemand(url);
     }
 
-    replace(source: string): void {
-        let url = this.getUrl(this.base, source);
+    replace(urlOrPath: string): void {
+        let url = this.getUrl(this.base, urlOrPath);
         this.onDemand(url, true);
     }
 

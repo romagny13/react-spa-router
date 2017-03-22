@@ -1,5 +1,5 @@
 /*!
- * React Spa Router v0.0.6
+ * React Spa Router v0.0.7
  * (c) 2017 romagny13
  * Released under the MIT License.
  */
@@ -318,54 +318,54 @@ var Activator = (function () {
     return Activator;
 }());
 
-function runQueue(queue, guard, callback) {
-    var index = 0, length = queue.length;
-    function next(fn) {
-        guard(fn, function (canContinue) {
-            if (canContinue) {
-                index++;
-                if (index < length) {
-                    next(queue[index]);
-                }
-                else {
-                    callback(true);
-                }
+function checkHooks(hooks, handler, next) {
+    var index = 0, length = hooks.length;
+    function nextHook(fn) {
+        handler(fn, function (response) {
+            if (response === false || isString(response)) {
+                next(response); /* cancel or redirection */
             }
             else {
-                callback(false); /*canceled*/
+                index++;
+                if (index < length) {
+                    nextHook(hooks[index]);
+                }
+                else {
+                    next(true);
+                }
             }
         });
     }
     if (length > 0) {
-        next(queue[index]);
+        nextHook(hooks[index]);
     }
     else {
-        callback(true);
+        next(true);
     }
 }
-function getHooks(activator, type, route) {
-    var result = [];
+function getRouteHooks(type, route, activator) {
+    var hooks = [];
     if (isDefined(route.matched) && route.matched[type]) {
         // type: canActivate or canDeactivate
-        route.matched[type].forEach(function (hook) {
-            var instance = activator.getInstance(hook);
-            if (!isFunction(instance[type])) {
+        route.matched[type].forEach(function (guard) {
+            var guardInstance = activator.getInstance(guard);
+            if (!isFunction(guardInstance[type])) {
                 throw new Error('Invalid hook type');
             }
-            result.push(instance[type]);
+            hooks.push(guardInstance[type]);
         });
     }
-    return result;
+    return hooks;
 }
 var Guard = (function () {
     function Guard() {
         this._activator = new Activator();
     }
     Guard.prototype.checkCanDeactivate = function (from, to, activeComponents, next) {
-        var hooks = getHooks(this._activator, 'canDeactivate', from);
+        var hooks = getRouteHooks('canDeactivate', from, this._activator);
         if (hooks.length > 0) {
-            runQueue(hooks, function (hook, canDeactivate) {
-                hook.call(hook, activeComponents, to, canDeactivate);
+            checkHooks(hooks, function (hook, canDeactivate) {
+                hook(activeComponents, to, canDeactivate);
             }, next);
         }
         else {
@@ -373,10 +373,10 @@ var Guard = (function () {
         }
     };
     Guard.prototype.checkCanActivate = function (to, next) {
-        var hooks = getHooks(this._activator, 'canActivate', to);
+        var hooks = getRouteHooks('canActivate', to, this._activator);
         if (hooks.length > 0) {
-            runQueue(hooks, function (hook, canActivate) {
-                hook.call(hook, to, canActivate);
+            checkHooks(hooks, function (hook, canActivate) {
+                hook(to, canActivate);
             }, next);
         }
         else {
@@ -435,6 +435,7 @@ var HistoryMode = (function () {
         }
     };
     HistoryMode.prototype.check = function (url, path, replaceOnRedirect, onSuccess, onError) {
+        var _this = this;
         var route = this._routeResolver.resolve(routes, path, url);
         if (isDefined(route.matched) && route.matched.redirectTo) {
             this.redirectTo(route.matched.redirectTo, replaceOnRedirect);
@@ -443,33 +444,39 @@ var HistoryMode = (function () {
             // check
             if (isUndefined(route.matched)) {
                 // notfound
-                this._guard.checkCanDeactivate(this.current, route, activeComponents, function (canContinue) {
-                    if (canContinue) {
-                        onError({ type: 'notfound', route: route });
+                this._guard.checkCanDeactivate(this.current, route, activeComponents, function (response) {
+                    if (isString(response)) {
+                        _this.redirectTo(response);
+                    }
+                    else if (response === false) {
+                        onError({ type: 'aborted', route: route });
                     }
                     else {
-                        onError({ type: 'aborted', route: route });
+                        onError({ type: 'notfound', route: route });
                     }
                 });
             }
             else {
-                this._guard.approve(this.current, route, activeComponents, function (canContinue) {
-                    if (canContinue) {
-                        onSuccess(route);
+                this._guard.approve(this.current, route, activeComponents, function (response) {
+                    if (isString(response)) {
+                        _this.redirectTo(response);
+                    }
+                    else if (response === false) {
+                        onError({ type: 'aborted', route: route });
                     }
                     else {
-                        onError({ type: 'aborted', route: route });
+                        onSuccess(route);
                     }
                 });
             }
         }
     };
-    HistoryMode.prototype.go = function (source) {
-        var url = this.getUrl(this.base, source);
+    HistoryMode.prototype.go = function (urlOrPath) {
+        var url = this.getUrl(this.base, urlOrPath);
         this.onDemand(url);
     };
-    HistoryMode.prototype.replace = function (source) {
-        var url = this.getUrl(this.base, source);
+    HistoryMode.prototype.replace = function (urlOrPath) {
+        var url = this.getUrl(this.base, urlOrPath);
         this.onDemand(url, true);
     };
     HistoryMode.prototype.back = function () {

@@ -5,7 +5,7 @@ import { viewRender, RouterView } from '../src/components/RouterView';
 import { Link } from '../src/components/Link';
 
 class MyGuard {
-    canActivate(route, next) {
+    canActivate(from, to, next) {
         let result = confirm('Activate?');
         next(result);
     }
@@ -151,7 +151,7 @@ const routes = [
                         console.log('receive result', result);
                         // with promise
                         return new Promise((resolve) => {
-                           throw 'Error result 4';
+                            throw 'Error result 4';
                         });
                     },
                     ({ result, error }) => {

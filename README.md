@@ -354,7 +354,7 @@ Create a class
 class MyGuard {
     canActivate(route, next) {
         let result = confirm('Activate?');
-        next(result);
+        next(result); // could return true | false or string redirect url
     }
     canDeactivate(activeComponents, route, next) {
         let component = activeComponents['PostList'];
@@ -389,6 +389,53 @@ export class PostList extends React.Component<any, any> {
         );
     }
 }
+```
+
+### Auth flow
+
+Guard 
+
+```js
+class AuthGuard {
+  canActivate(route, next) {
+    if (auth.isLoggedin()) {
+      next(true);
+    }
+    else {
+      // add a query with the url to redirect after user logged in
+      next('/signin?redirect=' + route.url);
+    }
+  }
+}
+```
+
+Routes
+
+```js
+const routes = [
+  { path: '/', action: () => viewRender(<Home />), canActivate: [AuthGuard] },
+  // Inject the router and the route to component
+  { path: '/signin', action: ({ router, route }) => viewRender(<Signin router={router} route={route} />) }
+];
+```
+
+Signin component
+```js
+class Signin extends Component {
+  /* etc. */
+  onSubmit(event) {
+    event.preventDefault();
+    const { email, password } = this.state;
+    auth.loggin(email, password).then(() => {
+      // get redirect url from query
+      let redirect = this.props.route.query.redirect;
+      // use replace to replace signin page in history by redirect url
+      this.props.router.replaceUrl(redirect);
+    });
+  }
+  /* etc. */
+}
+export default Signin;
 ```
 
 ## With Redux

@@ -1,6 +1,6 @@
 {
   "name": "react-spa-router",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "React Spa Router",
   "main": "dist/react-spa-router.js",
   "typings": "types/index.d.ts",

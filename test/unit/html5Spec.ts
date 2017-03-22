@@ -28,7 +28,7 @@ describe('Html5 history', () => {
     }
 
     function CancelActivate() {
-        this.canActivate = function (route, next) {
+        this.canActivate = function (to, next) {
             next(false);
         };
     }
