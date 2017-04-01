@@ -39,6 +39,7 @@ action | an action
 actions | an array of actions
 data |  extra data to pass
 canActivate | route guards
+canActivateChild | route guard for children
 canDeactivate | route guards
 redirectTo | redirect to route url
 children | nested routes
@@ -404,7 +405,7 @@ export class PostList extends React.Component<any, any> {
 
 ### canActivateChild
 
-Guard called for all children
+Guard chidlren
 
 ```js
 class MyGuard {
@@ -415,7 +416,7 @@ class MyGuard {
 }
 ```
 
-Add guard to parent route
+Add guard to the parent route
 
 ```js
 const routes = [
@@ -435,7 +436,7 @@ const routes = [
                     ({ router, route }) => console.log('Activate customer detail', router, route)
                 ]
             }]
-    },
+    }
 ];
 ```
 
