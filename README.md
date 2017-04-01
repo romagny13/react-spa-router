@@ -63,7 +63,8 @@ error | previous action error / rejection
 
 <img src="http://res.cloudinary.com/romagny13/image/upload/v1483654173/captureurl_ejcmab.png" />
 
-### Example create routes
+Example create routes
+
 ```js
 const routes = [
     { path: '/', action: () => viewRender(<Home />) },
@@ -94,7 +95,8 @@ const routes = [
 ];
 ```
 
-### An action return the previous action result (or error / rejection). Example:
+An action return the previous action result (or error / rejection). Example:
+
 ```js
 const routes = [
     {
@@ -185,7 +187,7 @@ const routes = [
 ];
 ```
 
-### Create router (in App component)
+### Create a router (in App component)
 
 ```js
 class App extends React.Component<any, any> {
