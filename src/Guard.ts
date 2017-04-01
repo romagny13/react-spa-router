@@ -1,7 +1,11 @@
 import { Route } from './Route';
 import { isDefined, isFunction } from './util';
-import { Activator } from './Activator';
-import { isString } from './util/types';
+import { activator } from './Activator';
+import { isString, isArray } from './util/types';
+
+export interface CanActivateChild {
+    canActivate(childRoute: Route, next: Function): void;
+}
 
 export interface CanActivate {
     canActivate(route: Route, next: Function): void;
@@ -11,7 +15,7 @@ export interface CanDeactivate {
     canDeactivate(activeComponents: any, route: Route, next: Function): void;
 }
 
-function checkHooks(hooks: Function[], handler: Function, next: Function): void {
+export function checkHooks(hooks: Function[], handler: Function, next: Function): void {
     let index = 0,
         length = hooks.length;
 
@@ -32,27 +36,44 @@ function checkHooks(hooks: Function[], handler: Function, next: Function): void 
     else { next(true); }
 }
 
-function getRouteHooks(type: string, route: Route, activator: Activator): Function[] {
-    let hooks = [];
-    if (isDefined(route.matched) && route.matched[type]) {
-        // type: canActivate or canDeactivate
-        route.matched[type].forEach((guard) => {
-            let guardInstance = activator.getInstance(guard);
-            if (!isFunction(guardInstance[type])) { throw new Error('Invalid hook type'); }
-            hooks.push(guardInstance[type]);
-        });
+function getHooks(type: string, guards: Array<any>) {
+    let result = [];
+    guards.forEach((guard) => {
+        let guardInstance = activator.getInstance(guard);
+        if (!isFunction(guardInstance[type])) { throw new Error('No function ' + type + ' found for guard instance'); }
+        result.push(guardInstance[type]);
+    });
+    return result;
+}
+
+function getActivateRouteHooks(route: Route) {
+    const type = 'canActivate',
+        childType = 'canActivateChild';
+    if (isDefined(route.matched)) {
+        // canActivateChild
+        let root = route.matched.root;
+        if (root && isArray(root[childType])) {
+            return getHooks(childType, root[childType]);
+        }
+        // canActivate
+        else if (isArray(route.matched[type])) {
+            return getHooks(type, route.matched[type]);
+        }
     }
-    return hooks;
+    return [];
+}
+
+function getDeactivateRouteHooks(route: Route) {
+    const type = 'canDeactivate';
+    if (isDefined(route.matched) && isArray(route.matched[type])) {
+        return getHooks(type, route.matched[type]);
+    }
+    return [];
 }
 
 export class Guard {
-    _activator: Activator;
-    constructor() {
-        this._activator = new Activator();
-    }
-
     checkCanDeactivate(from: Route, to: Route, activeComponents: any, next: Function): void {
-        const hooks = getRouteHooks('canDeactivate', from, this._activator);
+        const hooks = getDeactivateRouteHooks(from);
         if (hooks.length > 0) {
             checkHooks(hooks, (hook, canDeactivate) => {
                 hook(activeComponents, to, canDeactivate);
@@ -62,7 +83,7 @@ export class Guard {
     }
 
     checkCanActivate(to: Route, next: Function): void {
-        const hooks = getRouteHooks('canActivate', to, this._activator);
+        const hooks = getActivateRouteHooks(to);
         if (hooks.length > 0) {
             checkHooks(hooks, (hook, canActivate) => {
                 hook(to, canActivate);

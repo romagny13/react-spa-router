@@ -37,3 +37,5 @@ export class Activator {
         else { throw TypeError('Invalid type. Require a function / class'); }
     }
 }
+
+export const activator = new Activator();

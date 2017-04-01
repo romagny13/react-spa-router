@@ -33,7 +33,7 @@ export class Html5History extends HistoryMode {
         }, (event) => {
             // Error
             window.history.pushState(this.getState(), null, this.current.url);
-            if (this._onError) { this._onError(event); }
+            this._onError(event);
         });
     }
 
@@ -45,8 +45,7 @@ export class Html5History extends HistoryMode {
             else { window.history.pushState(this.getState(), null, url); }
             this._onSuccess(to);
         }, (event) => {
-            // Error
-            this._onError(event);
+           this._onError(event);
         });
     }
 
@@ -57,7 +56,6 @@ export class Html5History extends HistoryMode {
                 window.history.replaceState(this.getState(), null, this.current.url);
                 this._onSuccess(to);
             }, (event) => {
-                // Error
                 this._onError(event);
             });
         });

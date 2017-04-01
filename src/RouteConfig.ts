@@ -49,6 +49,7 @@ export class RouteConfig {
     action: Function;
     canActivate: Array<any>;
     canDeactivate: Array<any>;
+    canActivateChild: Array<any>;
     redirectTo: any;
     parent: RouteConfig;
     parents: Array<RouteConfig>;
@@ -79,6 +80,7 @@ export class RouteConfig {
 
         this.canActivate = config.canActivate;
         this.canDeactivate = config.canDeactivate;
+        this.canActivateChild = config.canActivateChild;
         this.redirectTo = config.redirectTo;
         this.data = config.data;
         this.parent = config.parent;

@@ -217,6 +217,17 @@ Or
 <Link to={{ name: 'about' }} activeClassName='active'>About</Link>
 ```
 
+With params
+```js
+{this.state.posts.map((post, i) => {
+        return <article key={post.id}>
+                    <h2>{post.title}</h2>
+                    <p>{post.excerpt}</p>
+                    <Link to={{ name: 'post-detail', params: { id: post.id } }}>Read More</Link>
+                </article>;
+})}
+ ```
+
 ### activeClassName
 
 ```js
@@ -389,6 +400,43 @@ export class PostList extends React.Component<any, any> {
         );
     }
 }
+```
+
+### canActivateChild
+
+Guard called for all children
+
+```js
+class MyGuard {
+    canActivateChild(childRoute, next) {
+        let result = confirm('Activate child?');
+        next(result);
+    }
+}
+```
+
+Add guard to parent route
+
+```js
+const routes = [
+    { path: '/', action: () => viewRender(<Home />) },
+    {
+        path: 'customers', canActivateChild: [MyGuard], action: () => viewRender(<Customers />, 'customers'),
+        children: [
+            {
+                path: '',
+                actions: [
+                    ({ router }) => console.log('Activate customers', router)
+                ]
+            },
+            {
+                path: ':id',
+                actions: [
+                    ({ router, route }) => console.log('Activate customer detail', router, route)
+                ]
+            }]
+    },
+];
 ```
 
 ### Auth flow

@@ -30,7 +30,7 @@ export class HashHistory extends HistoryMode {
         }, (event) => {
             // Error
             window.location.hash = convertToFullPathStringWithQueryString(this.current.path, this.current.queryString, this.current.fragment);
-            if (this._onError) { this._onError(event); }
+            this._onError(event);
         });
     }
 
@@ -43,8 +43,7 @@ export class HashHistory extends HistoryMode {
             else { window.location.hash = convertToFullPathStringWithQueryString(to.path, to.queryString, to.fragment); }
             this._onSuccess(to);
         }, (event) => {
-            // Error
-            if (this._onError) { this._onError(event); }
+            this._onError(event);
         });
     }
 

@@ -14,13 +14,20 @@ Should approve
 let guard: Guard,
     fakeRoute,
     routeWithClass,
+    routeWithChildren,
     routeWithInjected,
+    subscriberActivateChildClass,
     subscriberActivateClass,
     subscriberDeactivateClass,
+    canContinueActivateChildClass = true,
     canContinueActivateClass = true,
     canContinueDeactivateClass = true;
 
 class TestGuard implements CanActivate, CanDeactivate {
+    canActivateChild(childRoute, next) {
+        if (subscriberActivateChildClass) { subscriberActivateChildClass(childRoute); }
+        next(canContinueActivateChildClass);
+    }
     canActivate(route, next) {
         if (subscriberActivateClass) { subscriberActivateClass(route); }
         next(canContinueActivateClass);
@@ -32,6 +39,15 @@ class TestGuard implements CanActivate, CanDeactivate {
     }
 }
 
+function getChildRoute(childName, parent) {
+    for (let i = 0; i < parent.children.length; i++) {
+        let child = parent.children[i];
+        if (child.name === childName) {
+            return child;
+        }
+    }
+}
+
 describe('Guard tests', () => {
 
     before(() => {
@@ -39,6 +55,12 @@ describe('Guard tests', () => {
         fakeRoute = { name: '/fakeroute' };
 
         routeWithClass = { name: '/classroute', matched: { path: '/classroute', canActivate: [TestGuard], canDeactivate: [TestGuard] } };
+
+        routeWithChildren = { name: '/parent', canActivateChild: [TestGuard] };
+        routeWithChildren.children = [
+            { name: 'index', path: '', matched: { root: routeWithChildren } },
+            { name: 'detail', path: ':id', matched: { root: routeWithChildren } }
+        ];
     });
 
     after(() => {
@@ -57,6 +79,24 @@ describe('Guard tests', () => {
     it('Should cancel activate with class', (done) => {
         canContinueActivateClass = false;
         guard.checkCanActivate(routeWithClass, (canContinue) => {
+            assert.isFalse(canContinue);
+            done();
+        });
+    });
+
+    it('Should activate child', (done) => {
+        canContinueActivateChildClass = true;
+        let childRoute = getChildRoute('detail', routeWithChildren);
+        guard.checkCanActivate(childRoute, (canContinue) => {
+            assert.isTrue(canContinue);
+            done();
+        });
+    });
+
+    it('Should cancel activate child', (done) => {
+        canContinueActivateChildClass = false;
+        let childRoute = getChildRoute('detail', routeWithChildren);
+        guard.checkCanActivate(childRoute, (canContinue) => {
             assert.isFalse(canContinue);
             done();
         });
@@ -88,6 +128,20 @@ describe('Guard tests', () => {
             done();
         };
         guard.checkCanActivate(routeWithClass, (canContinue) => {
+
+        });
+    });
+
+    it('Should receive infos on activate child', (done) => {
+        canContinueActivateChildClass = true;
+        let childRoute = getChildRoute('detail', routeWithChildren);
+
+        subscriberActivateChildClass = (route) => {
+            assert.equal(route.name, 'detail');
+            subscriberActivateChildClass = undefined;
+            done();
+        };
+        guard.checkCanActivate(childRoute, (canContinue) => {
 
         });
     });

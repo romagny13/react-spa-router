@@ -1,4 +1,4 @@
-// Type definitions for react-spa-router 0.0.1
+// Type definitions for react-spa-router 0.0.8
 // Project: https://github.com/romagny13/react-spa-router
 // Definitions by: romagny13 <https://github.com/romagny13>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
@@ -25,6 +25,10 @@ interface Route {
     query: any;
     fragment: string;
     matched: RouteConfig;
+}
+
+interface CanActivateChild {
+    canActivate(childRoute: Route, next: Function): void;
 }
 
 interface CanActivate {
@@ -57,6 +61,7 @@ interface Router {
 interface ReactSpaRouterStatic {
     Link: any;
     RouterView: any;
+    CanActivateChild: CanActivateChild;
     CanActivate: CanActivate;
     CanDeactivate: CanDeactivate;
     Router: Router;

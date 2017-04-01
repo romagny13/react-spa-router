@@ -5,6 +5,12 @@ import { viewRender, RouterView } from '../src/components/RouterView';
 import { Link } from '../src/components/Link';
 
 class MyGuard {
+    canActivateChild(childRoute, next) {
+        console.log('Can activate child route', childRoute);
+        next(true);
+        /*let result = confirm('Activate child?');
+        next(result);*/
+    }
     canActivate(to, next) {
         let result = confirm('Activate?');
         next(result);
@@ -114,7 +120,7 @@ const routes = [
     { path: '/posts/:id', action: ({ route }) => viewRender(<PostDetail id={route.params.id} />) },
     { name: 'about', path: '/about', action: () => viewRender(<About />) },
     {
-        path: 'customers', action: () => viewRender(<Customers />, 'customers'),
+        path: 'customers', canActivateChild: [MyGuard], action: () => viewRender(<Customers />, 'customers'),
         children: [
             {
                 path: '',

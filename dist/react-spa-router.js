@@ -1,5 +1,5 @@
 /*!
- * React Spa Router v0.0.7
+ * React Spa Router v0.0.8
  * (c) 2017 romagny13
  * Released under the MIT License.
  */
@@ -317,6 +317,7 @@ var Activator = (function () {
     };
     return Activator;
 }());
+var activator = new Activator();
 
 function checkHooks(hooks, handler, next) {
     var index = 0, length = hooks.length;
@@ -343,26 +344,43 @@ function checkHooks(hooks, handler, next) {
         next(true);
     }
 }
-function getRouteHooks(type, route, activator) {
-    var hooks = [];
-    if (isDefined(route.matched) && route.matched[type]) {
-        // type: canActivate or canDeactivate
-        route.matched[type].forEach(function (guard) {
-            var guardInstance = activator.getInstance(guard);
-            if (!isFunction(guardInstance[type])) {
-                throw new Error('Invalid hook type');
-            }
-            hooks.push(guardInstance[type]);
-        });
+function getHooks(type, guards) {
+    var result = [];
+    guards.forEach(function (guard) {
+        var guardInstance = activator.getInstance(guard);
+        if (!isFunction(guardInstance[type])) {
+            throw new Error('No function ' + type + ' found for guard instance');
+        }
+        result.push(guardInstance[type]);
+    });
+    return result;
+}
+function getActivateRouteHooks(route) {
+    var type = 'canActivate', childType = 'canActivateChild';
+    if (isDefined(route.matched)) {
+        // canActivateChild
+        var root = route.matched.root;
+        if (root && isArray(root[childType])) {
+            return getHooks(childType, root[childType]);
+        }
+        else if (isArray(route.matched[type])) {
+            return getHooks(type, route.matched[type]);
+        }
     }
-    return hooks;
+    return [];
+}
+function getDeactivateRouteHooks(route) {
+    var type = 'canDeactivate';
+    if (isDefined(route.matched) && isArray(route.matched[type])) {
+        return getHooks(type, route.matched[type]);
+    }
+    return [];
 }
 var Guard = (function () {
     function Guard() {
-        this._activator = new Activator();
     }
     Guard.prototype.checkCanDeactivate = function (from, to, activeComponents, next) {
-        var hooks = getRouteHooks('canDeactivate', from, this._activator);
+        var hooks = getDeactivateRouteHooks(from);
         if (hooks.length > 0) {
             checkHooks(hooks, function (hook, canDeactivate) {
                 hook(activeComponents, to, canDeactivate);
@@ -373,7 +391,7 @@ var Guard = (function () {
         }
     };
     Guard.prototype.checkCanActivate = function (to, next) {
-        var hooks = getRouteHooks('canActivate', to, this._activator);
+        var hooks = getActivateRouteHooks(to);
         if (hooks.length > 0) {
             checkHooks(hooks, function (hook, canActivate) {
                 hook(to, canActivate);
@@ -525,9 +543,7 @@ var Html5History = (function (_super) {
         }, function (event) {
             // Error
             window.history.pushState(_this.getState(), null, _this.current.url);
-            if (_this._onError) {
-                _this._onError(event);
-            }
+            _this._onError(event);
         });
     };
     Html5History.prototype.onDemand = function (url, replace) {
@@ -543,7 +559,6 @@ var Html5History = (function (_super) {
             }
             _this._onSuccess(to);
         }, function (event) {
-            // Error
             _this._onError(event);
         });
     };
@@ -555,7 +570,6 @@ var Html5History = (function (_super) {
                 window.history.replaceState(_this.getState(), null, _this.current.url);
                 _this._onSuccess(to);
             }, function (event) {
-                // Error
                 _this._onError(event);
             });
         });
@@ -598,9 +612,7 @@ var HashHistory = (function (_super) {
         }, function (event) {
             // Error
             window.location.hash = convertToFullPathStringWithQueryString(_this.current.path, _this.current.queryString, _this.current.fragment);
-            if (_this._onError) {
-                _this._onError(event);
-            }
+            _this._onError(event);
         });
     };
     HashHistory.prototype.onDemand = function (url, replace) {
@@ -617,10 +629,7 @@ var HashHistory = (function (_super) {
             }
             _this._onSuccess(to);
         }, function (event) {
-            // Error
-            if (_this._onError) {
-                _this._onError(event);
-            }
+            _this._onError(event);
         });
     };
     HashHistory.prototype.run = function () {
@@ -709,6 +718,7 @@ var RouteConfig = (function () {
         }
         this.canActivate = config.canActivate;
         this.canDeactivate = config.canDeactivate;
+        this.canActivateChild = config.canActivateChild;
         this.redirectTo = config.redirectTo;
         this.data = config.data;
         this.parent = config.parent;
