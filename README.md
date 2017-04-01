@@ -155,9 +155,7 @@ const routes = [
 
 Create a component About that receive a background color
 
-Use Webpack to resolve this component only when needed (dont import component) 
-
-<a href="https://webpack.js.org/guides/code-splitting-require/">code splitting</a>
+Use Webpack to resolve this component only when needed (dont import component) (<a href="https://webpack.js.org/guides/code-splitting-require/">code splitting</a>)
 
 ```js
 const resolveAbout = cb => {
