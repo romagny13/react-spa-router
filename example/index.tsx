@@ -22,6 +22,15 @@ class MyGuard {
     }
 }
 
+declare const require: any;
+
+// lazy loading
+const resolveAbout = cb => {
+    require.ensure([], () => {
+        cb(require('./About'));
+    });
+};
+
 export const Home = (props) => {
     return (
         <div style={{ background: '#c0392b' }}>
@@ -62,7 +71,7 @@ export class PostDetail extends React.Component<any, any> {
     }
 }
 
-export class About extends React.Component<any, any> {
+/*export class About extends React.Component<any, any> {
     render() {
         return (
             <div style={{ background: '#34495e' }}>
@@ -70,7 +79,7 @@ export class About extends React.Component<any, any> {
             </div>
         );
     }
-}
+}*/
 
 export class Customers extends React.Component<any, any> {
     render() {
@@ -118,7 +127,19 @@ const routes = [
     { path: '/', action: () => viewRender(<Home />) },
     { path: '/posts', action: () => viewRender(<PostList />), canActivate: [MyGuard], canDeactivate: [MyGuard] },
     { path: '/posts/:id', action: ({ route }) => viewRender(<PostDetail id={route.params.id} />) },
-    { name: 'about', path: '/about', action: () => viewRender(<About />) },
+    {
+        name: 'about', path: '/about', action: () => {
+            // lazy loading
+            resolveAbout((result) => {
+                // default for component exported as default / or with export name
+                // + props if needed
+                let About = React.createElement(result.default, {
+                    background: '#34495e'
+                });
+                viewRender(About);
+            });
+        }
+    },
     {
         path: 'customers', canActivateChild: [MyGuard], action: () => viewRender(<Customers />, 'customers'),
         children: [

@@ -63,7 +63,7 @@ error | previous action error / rejection
 
 <img src="http://res.cloudinary.com/romagny13/image/upload/v1483654173/captureurl_ejcmab.png" />
 
-Example create routes
+### Example create routes
 ```js
 const routes = [
     { path: '/', action: () => viewRender(<Home />) },
@@ -94,7 +94,7 @@ const routes = [
 ];
 ```
 
-An action return the previous action result (or error / rejection). Example:
+### An action return the previous action result (or error / rejection). Example:
 ```js
 const routes = [
     {
@@ -149,7 +149,44 @@ const routes = [
 ];
 ```
 
-Create router (in App component)
+### Lazy loading with Webpack
+
+Create a component About that receive a background color
+
+Use Webpack to resolve this component only when needed (dont import component) 
+
+<a href="https://webpack.js.org/guides/code-splitting-require/">code splitting</a>
+
+```js
+const resolveAbout = cb => {
+    require.ensure([], () => {
+        cb(require('./About'));
+    });
+};
+```
+
+Route 
+```js
+
+const routes = [
+    { path: '/', action: () => viewRender(<Home />) },
+    {
+        name: 'about', path: '/about', action: () => {
+            // lazy loading
+            resolveAbout((result) => {
+                // default for component exported as default / or with export name + props
+                let About = React.createElement(result.default, {
+                    background: '#34495e'
+                });
+                viewRender(About);
+            });
+        }
+    }
+];
+```
+
+### Create router (in App component)
+
 ```js
 class App extends React.Component<any, any> {
     constructor(props) {
@@ -405,7 +442,7 @@ export class PostList extends React.Component<any, any> {
 
 ### canActivateChild
 
-Guard chidlren
+Guard children
 
 ```js
 class MyGuard {
